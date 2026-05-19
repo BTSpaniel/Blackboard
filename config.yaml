@@ -1,0 +1,225 @@
+data_dir: data
+
+server:
+  host: 127.0.0.1
+  port: 8780
+  cors_origins: ["*"]
+  access:
+    lan_enabled: true
+    remote_enabled: false
+    public_base_url: ""
+    remote_token_env: BLACKBOARD_REMOTE_ACCESS_TOKEN
+    trust_forwarded_for: false
+
+logging:
+  level: INFO
+  console:
+    enabled: true
+
+# Three-format strategy
+context:
+  budget: 200000
+  budget_allocations:
+    role_meta: 1
+    objective: 1
+    agents_md: 6
+    project_intel: 6
+    card_memory: 4
+    priority_files: 10
+    verification: 1
+    constraints: 1
+    prior_feedback: 3
+    retry_requirements: 1
+    tool_status: 1
+    messages: 60
+    buffer: 5
+  max_history_messages: 60
+  compression:
+    enabled: true
+    threshold_chars: 5000
+    keep_raw_turns: 5
+
+react:
+  max_iterations: 10
+  coding_max_iterations: 12
+
+governors:
+  budget:
+    enabled: true
+    max_tokens_per_min: 250000
+    max_cost_per_day_usd: 25.0
+    max_tokens_per_session: 750000
+    estimated_tokens_per_call: 4000
+  capability:
+    disabled: []
+    source_restrictions: {}
+  health:
+    failure_threshold: 5
+    cooldown_s: 30
+  trust:
+    default_level: low
+    trusted_sources: []
+    owner_sources: []
+    identity_links: {}
+    step_up_secrets: {}
+  tool_policy:
+    strict: false
+
+coding:
+  enabled: true
+  max_concurrent: 4
+  max_job_retries: 2
+  job_timeout_s: 300
+  worktree_dir: .worktrees
+  worktree_base_branch: main
+  auto_merge: false
+  sync_jobs_use_claims: true
+
+web_search:
+  backend_weights:
+    google_cse: 1.9
+    browser_google: 1.5
+    searxng: 1.2
+    bing_html: 1.05
+    browser_bing: 1.15
+    yahoo_html: 0.9
+    browser_yahoo: 1.0
+    duckduckgo_ddgs: 1.0
+    duckduckgo_html: 0.95
+    duckduckgo_lite: 0.9
+  browser_serp:
+    min_interval_s: 20
+    failure_cooldown_s: 180
+    challenge_cooldown_s: 900
+    adaptive_backoff_multiplier: 1.6
+    max_cooldown_multiplier: 4.0
+    telemetry_enabled: true
+
+# Provider registry — adopts Luna's profiles/roles shape
+providers:
+  profiles:
+    openai-main:
+      type: llm_api
+      adapter: openai
+      endpoint: https://api.openai.com/v1
+      api_key_secret: openai_main
+      model: gpt-4o
+      timeout: 120
+      max_retries: 5
+      use_responses_api: false
+      capabilities: [chat, tools, vision, structured_output, streaming]
+      quality_tier: strong
+
+    anthropic-main:
+      type: llm_api
+      adapter: anthropic
+      endpoint: https://api.anthropic.com/v1
+      api_key_secret: anthropic_main
+      model: claude-sonnet-4-5
+      timeout: 120
+      max_retries: 5
+      capabilities: [chat, tools, vision, structured_output, streaming]
+      quality_tier: strong
+
+    claude-code:
+      type: coding_cli
+      adapter: claude_code_cli
+      bin: claude
+      capabilities: [code_edit, repo_aware, terminal_aware, streaming]
+
+    openai-codex-cli:
+      type: coding_cli
+      adapter: openai_codex_cli
+      bin: codex
+      model: gpt-5.5
+      models: [gpt-5.5, gpt-5.4-mini, gpt-5.3-codex-spark]
+      sandbox: workspace-write
+      ephemeral: true
+      capabilities: [code_edit, repo_aware, terminal_aware, streaming]
+
+    fireworks-fast:
+      type: llm_api
+      adapter: openai_compat
+      endpoint: https://api.fireworks.ai/inference/v1
+      api_key_secret: fireworks_main
+      model: accounts/fireworks/models/kimi-k2p5
+      timeout: 120
+      max_retries: 5
+      capabilities: [chat, tools, streaming]
+      quality_tier: balanced
+
+    groq-fast:
+      type: llm_api
+      adapter: openai_compat
+      endpoint: https://api.groq.com/openai/v1
+      api_key_secret: groq_main
+      model: llama-3.3-70b-versatile
+      timeout: 120
+      max_retries: 5
+      capabilities: [chat, tools, streaming, structured_output]
+      quality_tier: balanced
+
+    mistral-main:
+      type: llm_api
+      adapter: openai_compat
+      endpoint: https://api.mistral.ai/v1
+      api_key_secret: mistral_main
+      model: mistral-small-latest
+      timeout: 120
+      max_retries: 5
+      capabilities: [chat, tools, streaming, structured_output]
+      quality_tier: balanced
+
+    featherless-main:
+      type: llm_api
+      adapter: openai_compat
+      endpoint: https://api.featherless.ai/v1
+      api_key_secret: featherless_main
+      model: Qwen/Qwen2.5-7B-Instruct
+      timeout: 120
+      max_retries: 5
+      capabilities: [chat, tools, streaming]
+      quality_tier: budget
+
+    llama-local:
+      type: local_model
+      adapter: openai_compat
+      endpoint: http://127.0.0.1:8012/v1
+      api_key_secret: ""
+      model: gemma-4-27b-it
+      timeout: 120
+      max_retries: 2
+      capabilities: [chat, vision]
+      quality_tier: budget
+
+    llama-cpp-local:
+      type: local_model
+      adapter: llama_cpp_python
+      enabled: false
+      model: local-gguf
+      model_path_env: BLACKBOARD_LLAMA_CPP_MODEL_PATH
+      timeout: 180
+      max_retries: 1
+      n_ctx: 4096
+      n_threads: 4
+      n_gpu_layers: 0
+      capabilities: [chat, streaming]
+      quality_tier: budget
+
+  secrets:
+    openai_main:    { env: OPENAI_API_KEY }
+    anthropic_main: { env: ANTHROPIC_API_KEY }
+    fireworks_main: { env: FIREWORKS_API_KEY }
+    groq_main:      { env: GROQ_API_KEY }
+    mistral_main:   { env: MISTRAL_API_KEY }
+    featherless_main: { env: FEATHERLESS_API_KEY }
+
+  roles:
+    planner:      { profile: openai-main,    fallbacks: [anthropic-main, fireworks-fast] }
+    coder:        { profile: openai-main,    fallbacks: [openai-codex-cli, claude-code, anthropic-main, fireworks-fast] }
+    reviewer:     { profile: openai-main,    fallbacks: [anthropic-main] }
+    debugger:     { profile: anthropic-main, fallbacks: [openai-main] }
+    summarizer:   { profile: fireworks-fast, fallbacks: [openai-main, llama-local, llama-cpp-local] }
+    local_helper: { profile: llama-local,    fallbacks: [llama-cpp-local, fireworks-fast] }
+    local_cpp_helper: { profile: llama-cpp-local, fallbacks: [llama-local, fireworks-fast] }
+    presenter:    { profile: anthropic-main, fallbacks: [openai-main] }

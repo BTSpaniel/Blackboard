@@ -1,0 +1,210 @@
+:root {
+  /* Dark theme tokens */
+  --bg-0: #0b0d10;
+  --bg-1: #12161b;
+  --bg-2: #181d24;
+  --bg-3: #1f2630;
+  --bg-elev: #232a35;
+  --bg-glass: rgba(18, 22, 27, 0.84);
+  --bg-soft: rgba(255, 255, 255, 0.035);
+  --line: #2a323f;
+  --line-2: #354150;
+  --line-soft: rgba(255, 255, 255, 0.06);
+  --line-glow: rgba(122, 159, 255, 0.24);
+
+  --fg-0: #e9eef6;
+  --fg-1: #d5dce7;
+  --fg-2: #aeb8c7;
+  --fg-3: #7f8a9b;
+
+  --accent: #4f7cff;
+  --accent-2: #6c8aff;
+  --accent-3: #93b4ff;
+  --accent-dim: rgba(79, 124, 255, 0.18);
+  --accent-soft: rgba(79, 124, 255, 0.1);
+  --accent-glow: rgba(79, 124, 255, 0.34);
+
+  /* Status palette (board columns + card badges) */
+  --c-gray:   #6b7280;
+  --c-blue:   #3b82f6;
+  --c-purple: #8b5cf6;
+  --c-teal:   #14b8a6;
+  --c-amber:  #f59e0b;
+  --c-red:    #ef4444;
+  --c-green:  #22c55e;
+
+  /* Layout sizes */
+  --rail-w: 56px;
+  --toolbar-h: 52px;
+  --sidebar-w: 440px;
+  --exec-header-h: 44px;
+  --exec-h: clamp(260px, 30vh, 360px);
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --shadow: 0 10px 32px rgba(0, 0, 0, 0.32);
+  --shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.035) inset, 0 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-float: 0 22px 70px rgba(0, 0, 0, 0.48), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", "Consolas", monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* ── Text selection policy ─────────────────────────────────────
+   Default: chrome (toolbars, rails, headers, buttons, badges, tabs,
+   resize handles, hint pills) is NOT selectable so clicking around
+   doesn't accidentally highlight UI text.
+   Opt back in for actual content: card titles + bodies, chat messages,
+   raw planner output, terminal/diff/audit panes, code blocks, inputs. */
+html, body, .bb-app {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.bb-card__title,
+.bb-card__body,
+.bb-msg,
+.bb-msg__raw,
+.bb-msg__raw pre,
+.bb-history__diff,
+.bb-term__output,
+.bb-audit__row,
+.bb-audit__payload,
+.bb-diff,
+input, textarea, select,
+[contenteditable="true"],
+pre, code, kbd {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  cursor: text;
+}
+
+/* Within selectable containers, the role label / chrome bits go back to
+   non-selectable so only the actual message body gets highlighted. */
+.bb-msg__role,
+.bb-msg__raw > summary,
+.bb-card__meta,
+.bb-card__more,
+.bb-badge,
+.bb-chip,
+.bb-history__row-head,
+.bb-history__row .bb-history__sha,
+.bb-audit__row .bb-audit__kind,
+button, .bb-btn, .bb-rail__item, .bb-pulse,
+.bb-tab, .bb-toolbar, .bb-rail, .bb-col__header, .bb-sidebar__header,
+.bb-sidebar__resize, .bb-sidebar__hint, .bb-sidebar__icon, .bb-sidebar__session-id,
+.bb-modal__header, .bb-exec__header,
+kbd {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+button, .bb-btn, .bb-rail__item, .bb-pulse, .bb-tab,
+.bb-card__more, .bb-sidebar__icon, .bb-sidebar__hint,
+.bb-history__row, .bb-msg__raw > summary {
+  cursor: pointer;
+}
+.bb-sidebar__resize { cursor: col-resize; }
+.bb-card,
+.bb-card__title,
+.bb-card__body { cursor: grab; }
+.bb-card:active { cursor: grabbing; }
+/* Re-allow text selection in card content despite the parent grab cursor. */
+.bb-card__title,
+.bb-card__body { -webkit-user-select: text; user-select: text; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background:
+    radial-gradient(circle at 20% -10%, rgba(79, 124, 255, 0.16), transparent 32rem),
+    radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.12), transparent 28rem),
+    linear-gradient(180deg, #0c1016 0%, var(--bg-0) 42%, #07090d 100%);
+  color: var(--fg-0);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+}
+
+.bb-btn {
+  min-height: 32px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015)), var(--bg-2);
+  color: var(--fg-0);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px 13px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+  transition: background 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease), transform 160ms var(--ease), box-shadow 160ms var(--ease);
+}
+.bb-btn:hover { background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02)), var(--bg-3); border-color: var(--line-2); transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+.bb-btn:active { transform: translateY(0); }
+.bb-btn--primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: rgba(147, 180, 255, 0.62); color: white; box-shadow: 0 10px 28px rgba(79, 124, 255, 0.22), 0 1px 0 rgba(255,255,255,0.18) inset; }
+.bb-btn--primary:hover { background: linear-gradient(135deg, var(--accent-2), var(--accent-3)); border-color: rgba(147, 180, 255, 0.86); box-shadow: 0 14px 34px rgba(79, 124, 255, 0.3), 0 1px 0 rgba(255,255,255,0.2) inset; }
+.bb-btn--ghost { background: transparent; border-color: transparent; color: var(--fg-2); }
+.bb-btn--ghost:hover { background: var(--bg-soft); color: var(--fg-0); border-color: var(--line-soft); }
+.bb-btn--danger { background: transparent; color: var(--c-red); border-color: var(--c-red); }
+.bb-btn--danger:hover { background: var(--c-red); color: white; }
+
+.bb-input,
+.bb-toolbar__select,
+textarea {
+  background: rgba(7, 10, 14, 0.72);
+  color: var(--fg-0);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 8px 11px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  outline: none;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset;
+  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease);
+}
+.bb-input:focus, textarea:focus, .bb-toolbar__select:focus {
+  border-color: var(--accent);
+  background: rgba(11, 14, 19, 0.94);
+  box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.16), 0 10px 24px rgba(0,0,0,0.18);
+}
+
+.bb-badge {
+  display: inline-block;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.045);
+  color: var(--fg-1);
+  border: 1px solid var(--line-soft);
+  white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset;
+}
+.bb-badge--neutral { color: var(--fg-1); }
+.bb-badge--blue    { background: rgba(59, 130, 246, 0.15); color: var(--c-blue); border-color: rgba(59,130,246,0.3); }
+.bb-badge--purple  { background: rgba(139, 92, 246, 0.15); color: var(--c-purple); border-color: rgba(139,92,246,0.3); }
+.bb-badge--teal    { background: rgba(20, 184, 166, 0.15); color: var(--c-teal); border-color: rgba(20,184,166,0.3); }
+.bb-badge--amber   { background: rgba(245, 158, 11, 0.15); color: var(--c-amber); border-color: rgba(245,158,11,0.3); }
+.bb-badge--red     { background: rgba(239, 68, 68, 0.15); color: var(--c-red); border-color: rgba(239,68,68,0.3); }
+.bb-badge--green   { background: rgba(34, 197, 94, 0.15); color: var(--c-green); border-color: rgba(34,197,94,0.3); }
+.bb-badge--gray    { background: rgba(107, 114, 128, 0.15); color: var(--fg-1); border-color: rgba(107,114,128,0.3); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(90, 99, 115, 0.38); border: 3px solid transparent; border-radius: 999px; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(138, 148, 163, 0.58); border: 2px solid transparent; background-clip: padding-box; }

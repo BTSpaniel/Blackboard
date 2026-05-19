@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blackboard</title>
+  <link rel="stylesheet" href="/ui/styles/tokens.css" />
+  <link rel="stylesheet" href="/ui/styles/layout.css" />
+  <link rel="stylesheet" href="/ui/styles/sidebar.css" />
+  <link rel="stylesheet" href="/ui/styles/board.css" />
+  <link rel="stylesheet" href="/ui/styles/workspace.css" />
+  <link rel="stylesheet" href="/ui/styles/execution.css" />
+  <link rel="stylesheet" href="/ui/styles/modal.css" />
+  <link rel="stylesheet" href="/ui/styles/toolbar.css" />
+  <link rel="stylesheet" href="/ui/styles/dialog.css" />
+  <link rel="stylesheet" href="/ui/styles/mobile.css" />
+</head>
+<body>
+  <div id="app" class="bb-app">
+    <button id="mobile-drawer-scrim" class="bb-mobile__scrim" type="button" aria-label="Close menu" hidden></button>
+    <!-- Far-left icon rail -->
+    <aside class="bb-rail">
+      <button class="bb-rail__item bb-rail__item--active" data-view="board" title="Board">⊞</button>
+      <button class="bb-rail__item" data-view="preview" title="Preview">▶</button>
+      <button class="bb-rail__item" data-view="terminal" title="Terminal">▣</button>
+      <button class="bb-rail__item" data-view="audit" title="Audit">📜</button>
+      <button class="bb-rail__item" data-view="history" title="Version history">⏱</button>
+      <button class="bb-rail__item" data-view="settings" title="Settings">⚙</button>
+      <div class="bb-rail__spacer"></div>
+      <div class="bb-rail__status" id="ws-status" title="WebSocket">●</div>
+    </aside>
+
+    <!-- Top toolbar -->
+    <header class="bb-toolbar">
+      <div class="bb-toolbar__title">
+        <button id="mobile-menu-toggle" class="bb-mobile__menu-btn" type="button" aria-label="Open navigation" aria-expanded="false"><span class="bb-icon-hamburger" aria-hidden="true"><span></span><span></span><span></span></span></button>
+        <strong>Blackboard</strong>
+        <select id="project-select" class="bb-toolbar__select"></select>
+        <button id="new-project" class="bb-btn bb-btn--ghost" title="New project">+ Project</button>
+      </div>
+      <div class="bb-toolbar__center">
+        <input id="board-search" class="bb-input" placeholder="Search cards…" />
+      </div>
+      <div class="bb-toolbar__right">
+        <button id="provider-pulse" class="bb-pulse" title="Provider health" aria-label="Provider health">
+          <span class="bb-pulse__dot"></span>
+          <span class="bb-pulse__label" id="provider-pulse-label">— / —</span>
+        </button>
+      </div>
+    </header>
+
+    <aside id="mobile-drawer" class="bb-mobile__drawer" aria-hidden="true">
+      <div class="bb-mobile__drawer-head">
+        <strong>Blackboard</strong>
+        <button id="mobile-drawer-close" class="bb-mobile__drawer-close" type="button" aria-label="Close navigation"><span class="bb-icon-close" aria-hidden="true"></span></button>
+      </div>
+      <div class="bb-mobile__drawer-group">
+        <div class="bb-mobile__drawer-label">Primary</div>
+        <button class="bb-mobile__drawer-link" type="button" data-mobile-nav="chat">Chat</button>
+        <button class="bb-mobile__drawer-link" type="button" data-mobile-nav="board">Board</button>
+        <button class="bb-mobile__drawer-link" type="button" data-mobile-nav="artifacts">Studio</button>
+        <button class="bb-mobile__drawer-link" type="button" data-mobile-nav="console">Console</button>
+      </div>
+      <div class="bb-mobile__drawer-group">
+        <div class="bb-mobile__drawer-label">More</div>
+        <button class="bb-mobile__drawer-link" type="button" data-view="preview">Preview</button>
+        <button class="bb-mobile__drawer-link" type="button" data-view="audit">Audit</button>
+        <button class="bb-mobile__drawer-link" type="button" data-view="history">History</button>
+        <button class="bb-mobile__drawer-link" type="button" data-view="settings">Settings</button>
+      </div>
+      <div class="bb-mobile__drawer-group bb-mobile__drawer-group--actions">
+        <button id="mobile-new-card" class="bb-btn bb-btn--primary" type="button">+ Card</button>
+        <button id="mobile-focus-chat" class="bb-btn" type="button">Open chat</button>
+      </div>
+    </aside>
+
+    <!-- Left chat sidebar -->
+    <aside class="bb-sidebar">
+      <header class="bb-sidebar__header">
+        <span>Project Chat</span>
+        <span id="chat-fit-hint" class="bb-sidebar__hint" title="Click to size the chat panel to current activity"></span>
+      </header>
+      <div id="chat-messages" class="bb-sidebar__messages"></div>
+      <div class="bb-sidebar__compose">
+        <textarea id="chat-input" rows="3" placeholder="Ask Blackboard to add a card, plan a feature, or fix a bug…"></textarea>
+        <div class="bb-sidebar__compose-actions">
+          <div class="bb-sidebar__voice-tools">
+            <button id="chat-voice" class="bb-sidebar__voice-btn" type="button" title="Voice transcription" aria-label="Voice transcription"><span class="bb-icon-mic" aria-hidden="true"></span></button>
+            <button id="chat-wake" class="bb-sidebar__voice-btn bb-sidebar__voice-btn--secondary" type="button" title="Wake-word mode">Wake</button>
+          </div>
+          <button id="chat-send" class="bb-btn bb-btn--primary">Execute</button>
+        </div>
+      </div>
+      <!-- Drag-to-resize handle. Double-click resets to the midpoint, arrow keys nudge. -->
+      <div class="bb-sidebar__resize" id="sidebar-resize" title="Drag to resize · double-click to reset · arrows to nudge"></div>
+    </aside>
+
+    <!-- Center: workspace -->
+    <main class="bb-workspace" id="workspace-shell" data-active-workspace-view="board">
+      <header class="bb-workspace__toolbar">
+        <div class="bb-workspace__tabs" role="tablist" aria-label="Workspace views">
+          <button class="bb-workspace__tab bb-workspace__tab--active" type="button" data-workspace-switch="board" aria-pressed="true">Board</button>
+          <button class="bb-workspace__tab" type="button" data-workspace-switch="studio" aria-pressed="false">Artifact Studio</button>
+          <button class="bb-workspace__tab" type="button" data-workspace-switch="software-map" aria-pressed="false">Software Map</button>
+          <button class="bb-workspace__tab" type="button" data-workspace-switch="execution-map" aria-pressed="false">Execution Map</button>
+        </div>
+        <div class="bb-workspace__hint">Use the center panel as a larger working surface for artifacts, maps, and code.</div>
+      </header>
+      <div class="bb-workspace__surface">
+        <section class="bb-workspace__view bb-workspace__view--active" data-workspace-view="board">
+          <div class="bb-board" id="board"></div>
+        </section>
+        <section class="bb-workspace__view" data-workspace-view="studio">
+          <div class="bb-studio">
+            <aside class="bb-studio__sidebar">
+              <div class="bb-studio__mobile-sidebar-tabs" role="tablist" aria-label="Artifact Studio browser panes">
+                <button class="bb-studio__mobile-sidebar-tab bb-studio__mobile-sidebar-tab--active" type="button" data-studio-sidebar-tab="artifacts" aria-pressed="true">Artifacts</button>
+                <button class="bb-studio__mobile-sidebar-tab" type="button" data-studio-sidebar-tab="files" aria-pressed="false">Files</button>
+              </div>
+              <div class="bb-studio__stack">
+                <section class="bb-studio__section bb-studio__section--artifacts">
+                  <div class="bb-studio__sidebar-head">
+                    <div>
+                      <div class="bb-studio__label">Recent artifacts</div>
+                      <div class="bb-studio__path" id="studio-artifact-count">recent artifacts</div>
+                    </div>
+                    <div class="bb-studio__sidebar-actions">
+                      <select class="bb-studio__select" id="studio-artifact-sort" aria-label="Sort artifacts">
+                        <option value="updated_desc">Recently updated</option>
+                        <option value="created_desc">Recently created</option>
+                        <option value="title_asc">Title A–Z</option>
+                        <option value="type_asc">Type</option>
+                      </select>
+                      <button class="bb-studio__icon" id="studio-artifacts-refresh" type="button" title="Refresh artifacts">↻</button>
+                    </div>
+                  </div>
+                  <div class="bb-studio__files" id="studio-artifact-list"></div>
+                </section>
+                <section class="bb-studio__section bb-studio__section--files">
+                  <div class="bb-studio__sidebar-head">
+                    <div>
+                      <div class="bb-studio__label">Artifact files</div>
+                      <div class="bb-studio__path" id="studio-file-count">open an artifact to browse files</div>
+                    </div>
+                    <div class="bb-studio__sidebar-actions">
+                      <button class="bb-studio__icon" id="studio-file-new" type="button" title="New artifact file">+ File</button>
+                      <button class="bb-studio__icon" id="studio-folder-new" type="button" title="New artifact folder">+ Folder</button>
+                    </div>
+                  </div>
+                  <div class="bb-studio__files" id="studio-file-list"></div>
+                </section>
+              </div>
+            </aside>
+            <section class="bb-studio__main">
+              <div class="bb-studio__main-head">
+                <div>
+                  <div class="bb-studio__label" id="studio-title">Artifact Studio</div>
+                  <div class="bb-studio__meta" id="studio-subtitle">open an artifact from chat or pick one from recent artifacts</div>
+                  <div class="bb-studio__meta" id="studio-doc-path">No artifact selected</div>
+                </div>
+                <div class="bb-studio__actions">
+                  <button class="bb-studio__action bb-studio__mobile-back" id="studio-mobile-back" type="button" hidden>Browse</button>
+                  <div class="bb-studio__switcher">
+                    <button class="bb-studio__switch bb-studio__switch--active" type="button" data-studio-switch="preview" aria-pressed="true">Preview</button>
+                    <button class="bb-studio__switch" type="button" data-studio-switch="code" aria-pressed="false">Code</button>
+                  </div>
+                  <button class="bb-studio__action" id="studio-artifact-source" type="button">Artifact source</button>
+                  <button class="bb-studio__action" id="studio-artifact-rename" type="button">Rename artifact</button>
+                  <button class="bb-studio__action" id="studio-artifact-delete" type="button">Delete artifact</button>
+                  <button class="bb-studio__action" id="studio-apply" type="button">Apply</button>
+                  <button class="bb-studio__action" id="studio-save" type="button">Save artifact</button>
+                  <button class="bb-studio__action" id="studio-popout" type="button">Open tab</button>
+                </div>
+              </div>
+              <div class="bb-studio__content">
+                <div class="bb-studio__panel bb-studio__panel--preview bb-studio__panel--active" data-studio-panel="preview">
+                  <div class="bb-studio__preview-wrap">
+                    <div class="bb-studio__preview-head">
+                      <div class="bb-studio__preview-copy">
+                        <div class="bb-studio__preview-title" id="studio-preview-title">Select an artifact to preview</div>
+                        <div class="bb-studio__preview-meta" id="studio-preview-meta">Recent artifacts stay sorted so the latest work is always on top.</div>
+                      </div>
+                      <div class="bb-studio__preview-badge" id="studio-preview-badge">Preview</div>
+                    </div>
+                    <div class="bb-studio__preview-shell">
+                      <iframe id="studio-preview-frame" class="bb-studio__preview" sandbox="allow-scripts allow-forms"></iframe>
+                    </div>
+                  </div>
+                </div>
+                <div class="bb-studio__panel bb-studio__panel--code" data-studio-panel="code">
+                  <div class="bb-studio__code-wrap">
+                    <div class="bb-studio__code-head">
+                      <div class="bb-studio__meta">Syntax-aware editor</div>
+                      <div class="bb-studio__code-language" id="studio-code-language">HTML</div>
+                    </div>
+                    <div class="bb-studio__code-shell">
+                      <div class="bb-studio__code-gutter" id="studio-code-gutter" aria-hidden="true"></div>
+                      <pre id="studio-code-highlight" class="bb-studio__code-highlight" aria-hidden="true"></pre>
+                      <textarea id="studio-code-editor" class="bb-studio__code" spellcheck="false"></textarea>
+                    </div>
+                    <div class="bb-studio__code-status" id="studio-code-status">
+                      <span class="bb-studio__code-status-item" id="studio-code-lines">1 line</span>
+                      <span class="bb-studio__code-status-item" id="studio-code-cursor">Ln 1, Col 1</span>
+                      <span class="bb-studio__code-status-item" id="studio-code-selection">Sel 0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+        <section class="bb-workspace__view" data-workspace-view="software-map">
+          <div class="bb-map__canvas" id="workspace-software-map"></div>
+        </section>
+        <section class="bb-workspace__view" data-workspace-view="execution-map">
+          <div class="bb-map__canvas" id="workspace-execution-map"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Bottom: execution panel -->
+    <section class="bb-exec">
+      <header class="bb-exec__header">
+        <div class="bb-exec__brand">
+          <span class="bb-exec__brand-icon">⚡</span>
+          <div>
+            <strong>Execution</strong>
+            <span class="bb-exec__subtitle">software console, jobs, router state, and model bleep output</span>
+          </div>
+        </div>
+        <div class="bb-exec__actions">
+          <span id="exec-summary" class="bb-exec__summary">no active jobs</span>
+          <button id="exec-toggle" class="bb-exec__toggle" type="button" data-exec-toggle="1" aria-expanded="true" aria-controls="exec-body" title="Hide execution panel">▾</button>
+        </div>
+      </header>
+      <div class="bb-exec__body" id="exec-body">
+        <div class="bb-exec__column">
+          <div class="bb-exec__column-head">
+            <h4 class="bb-exec__title-tab">Active jobs</h4>
+            <span class="bb-exec__mini-pill" id="exec-jobs-count">0</span>
+          </div>
+          <div id="exec-jobs"></div>
+        </div>
+        <div class="bb-exec__column bb-exec__column--stream">
+          <div class="bb-exec__column-head">
+            <h4 class="bb-exec__title-tab">System console</h4>
+            <span class="bb-exec__live-dot" id="exec-live-state">idle</span>
+          </div>
+          <pre id="exec-stream" class="bb-exec__stream"></pre>
+        </div>
+      </div>
+    </section>
+    <button id="exec-restore" class="bb-exec__restore" type="button" data-exec-toggle="1" aria-expanded="false" aria-controls="exec-body" title="Show execution panel" hidden>Execution ▴</button>
+    <nav class="bb-mobile__bottom-nav" aria-label="Mobile navigation">
+      <button class="bb-mobile__nav-item bb-mobile__nav-item--active" type="button" data-mobile-nav="chat">Chat</button>
+      <button class="bb-mobile__nav-item" type="button" data-mobile-nav="board">Board</button>
+      <button class="bb-mobile__nav-item" type="button" data-mobile-nav="artifacts">Studio</button>
+      <button class="bb-mobile__nav-item" type="button" data-mobile-nav="console">Logs</button>
+    </nav>
+  </div>
+
+  <!-- Modals -->
+  <div id="card-modal" class="bb-modal" hidden>
+    <div class="bb-modal__backdrop" data-close></div>
+    <div class="bb-modal__panel">
+      <header class="bb-modal__header">
+        <h3 id="card-modal-title">Card</h3>
+        <button class="bb-btn bb-btn--ghost" data-close>×</button>
+      </header>
+      <div class="bb-modal__body" id="card-modal-body"></div>
+      <footer class="bb-modal__footer" id="card-modal-footer"></footer>
+    </div>
+  </div>
+
+  <div id="diff-modal" class="bb-modal" hidden>
+    <div class="bb-modal__backdrop" data-close></div>
+    <div class="bb-modal__panel bb-modal__panel--wide">
+      <header class="bb-modal__header">
+        <h3>Diff</h3>
+        <button class="bb-btn bb-btn--ghost" data-close>×</button>
+      </header>
+      <div class="bb-modal__body">
+        <pre id="diff-body" class="bb-diff"></pre>
+      </div>
+      <footer class="bb-modal__footer" id="diff-footer"></footer>
+    </div>
+  </div>
+
+  <script type="module" src="/ui/core/bus.js"></script>
+  <script type="module" src="/ui/core/api.js"></script>
+  <script type="module" src="/ui/core/store.js"></script>
+  <script type="module" src="/ui/core/ws.js"></script>
+  <script type="module" src="/ui/shell/app.js"></script>
+</body>
+</html>

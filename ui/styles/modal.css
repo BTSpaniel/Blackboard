@@ -1,0 +1,251 @@
+.bb-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+.bb-modal[hidden] { display: none; }
+.bb-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(79,124,255,0.12), transparent 28rem),
+    rgba(2, 4, 8, 0.66);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.bb-modal__panel {
+  position: relative;
+  margin: 5vh auto;
+  width: 560px;
+  max-width: 90vw;
+  max-height: 90vh;
+  background: linear-gradient(180deg, rgba(18, 22, 27, 0.96), rgba(11, 14, 19, 0.98));
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-float);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.bb-modal__panel--wide { width: 920px; }
+.bb-modal__panel--card-editor {
+  width: min(1180px, 94vw);
+  max-height: 94vh;
+}
+.bb-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), transparent);
+}
+.bb-modal__header h3 { margin: 0; font-size: 15px; letter-spacing: 0.01em; }
+.bb-modal__body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  flex: 1;
+  color: var(--fg-1);
+  line-height: 1.6;
+}
+.bb-modal__footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  background: rgba(7, 10, 14, 0.56);
+}
+.bb-modal__field {
+  margin-bottom: 14px;
+  min-width: 0;
+}
+.bb-modal__field label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--fg-2);
+  margin-bottom: 6px;
+}
+.bb-modal__field input,
+.bb-modal__field textarea,
+.bb-modal__field select {
+  width: 100%;
+}
+.bb-card-editor__summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.bb-card-editor__summary-item {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.035);
+}
+.bb-card-editor__summary-item strong {
+  color: var(--fg-0);
+  font-size: 14px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+.bb-card-editor__summary-label {
+  color: var(--fg-2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+.bb-card-editor__grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.35fr);
+  gap: 14px 16px;
+  align-items: start;
+}
+.bb-card-editor__field--full {
+  grid-column: 1 / -1;
+}
+.bb-card-editor__hint {
+  margin: -2px 0 8px;
+  color: var(--fg-3);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.bb-card-editor__textarea {
+  resize: vertical;
+  min-height: 180px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.bb-card-editor__textarea--body {
+  min-height: 320px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.bb-modal__panel--card-editor .bb-modal__body {
+  padding: 18px 20px;
+}
+.bb-modal__panel--card-editor .bb-modal__footer {
+  padding: 14px 20px;
+  gap: 10px;
+}
+@media (max-width: 900px) {
+  .bb-card-editor__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bb-card-editor__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .bb-modal__panel {
+    margin: 10px auto;
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+    max-height: calc(100dvh - 20px);
+    border-radius: 16px;
+  }
+
+  .bb-modal__panel--card-editor {
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh - 12px);
+  }
+
+  .bb-modal__header,
+  .bb-modal__body,
+  .bb-modal__footer,
+  .bb-modal__panel--card-editor .bb-modal__body,
+  .bb-modal__panel--card-editor .bb-modal__footer {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .bb-card-editor__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .bb-card-editor__textarea {
+    min-height: 140px;
+  }
+
+  .bb-card-editor__textarea--body {
+    min-height: 220px;
+  }
+
+  .bb-modal__footer {
+    flex-wrap: wrap;
+    justify-content: stretch;
+  }
+
+  .bb-modal__footer .bb-btn {
+    flex: 1 1 100%;
+    min-height: 42px;
+  }
+
+  .bb-checkpoint__options {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .bb-chat-checkpoint button,
+  .bb-checkpoint__options .bb-btn {
+    width: 100%;
+  }
+}
+.bb-diff {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin: 0;
+  white-space: pre;
+  overflow-x: auto;
+  background: rgba(7, 10, 14, 0.72);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+.bb-diff__add { color: var(--c-green); }
+.bb-diff__del { color: var(--c-red); }
+.bb-diff__hdr { color: var(--fg-2); }
+
+.bb-checkpoint,
+.bb-chat-checkpoint {
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: var(--radius);
+  padding: 10px;
+  margin-bottom: 12px;
+}
+.bb-checkpoint__eyebrow {
+  color: var(--c-amber);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.bb-checkpoint__reason {
+  color: var(--fg-1);
+  margin: 6px 0 10px;
+}
+.bb-checkpoint__question,
+.bb-chat-checkpoint__question {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+.bb-checkpoint__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.bb-chat-checkpoint {
+  margin: 0;
+}
+.bb-chat-checkpoint button {
+  margin: 4px 4px 0 0;
+}
